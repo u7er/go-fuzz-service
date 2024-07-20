@@ -3,12 +3,12 @@
 
 # Build
 ```bash
-go build -o fuzz ./cmd/main.go
+go build -o /usr/local/bin/fuzz ./cmd/main.go
 ```
 
 # Run
 ```shell
-./fuzz --address "*:43000"
+fuzz --address "*:43000"
 ```
 
 # Daemon
@@ -26,7 +26,9 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 EOT
+```
 
+```shell
 systemctl enable fuzz.service \
 && systemctl start fuzz.service \
 && systemctl status fuzz.service
