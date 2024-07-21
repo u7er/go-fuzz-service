@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fuzz/storage"
 	"log"
 	mrand "math/rand"
 	"net/http"
@@ -14,6 +15,8 @@ const (
 	AlphabetLen = len(Alphabet)
 )
 
+var fileStorage *storage.Storage
+
 func GenerateRandomString(length int) string {
 	seededRand := mrand.New(mrand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, length)
@@ -24,7 +27,7 @@ func GenerateRandomString(length int) string {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Handeled request %s:%s %s", r.UserAgent(), r.RemoteAddr, r.RequestURI)
+	log.Printf("Handeled request. Addr:\"%s\" URI: \"%s\"", r.RemoteAddr, r.RequestURI)
 	response := make(map[string]string)
 	response["request_at"] = time.Now().String()
 	time.Sleep(time.Duration(70+mrand.Intn(80)) * time.Millisecond)
@@ -41,9 +44,14 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Could not write response:", err)
 	}
+
+	go fileStorage.StoreValue(response["value"])
 }
 
 func main() {
+	fileStorage, _ = storage.NewStorage("./values.txt")
+	defer fileStorage.Close()
+
 	var serverAddress string
 	flag.StringVar(&serverAddress, "address", "127.0.0.1:43000", "The server address in the format of host:port")
 	flag.Parse()
