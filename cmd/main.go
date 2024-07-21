@@ -49,12 +49,15 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fileStorage, _ = storage.NewStorage("./values.txt")
-	defer fileStorage.Close()
-
 	var serverAddress string
+	var storageLocation string
+
 	flag.StringVar(&serverAddress, "address", "127.0.0.1:43000", "The server address in the format of host:port")
+	flag.StringVar(&storageLocation, "storage", "values.txt", "The storage location")
 	flag.Parse()
+
+	fileStorage, _ = storage.NewStorage(storageLocation)
+	defer fileStorage.Close()
 
 	http.HandleFunc("/", rootHandler)
 	log.Printf("Listening on %s", serverAddress)
